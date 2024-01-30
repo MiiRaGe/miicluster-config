@@ -1,0 +1,8 @@
+longhornManager:
+  nodeSelector:
+    storage: longhorn
+longhornDriverDeployer:
+  nodeSelector:
+    storage: longhorn
+defaultSettings:
+  defaultDataPath: /media/data
