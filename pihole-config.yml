@@ -1,0 +1,50 @@
+# will create kubernees ingress
+ingress:
+  enabled: true
+  ingressClassName: traefik
+  hosts:
+  - pihole.miirage.net
+
+# will create kubernetes services for web admin
+serviceWeb:
+  type: ClusterIP
+  
+# will set your admin password for the web inteface
+admin:
+  enabled: true
+  existingSecret: "pihole-secret"
+  
+# create a kubernetes service and expose
+# port 53 outside of cluster on the local network
+serviceDns:
+  type: LoadBalancer
+  loadBalancerIP: "192.168.0.253"
+  annotations:
+    metallb.universe.tf/allow-shared-ip: "pihole-dns"
+
+serviceDhcp:
+  enabled: false
+  
+# enables cloudflare tunnel sidecar container
+# and sets upstream dns in pihole to leverage it
+doh:
+  enabled: true
+  pullPolicy: Always
+  envVars: {
+    DOH_UPSTREAM: "https://1.1.1.1/dns-query"
+  }
+  
+# pi-hole will automatially create a new
+# persistent volume managed by longhorn
+persistentVolumeClaim:
+  enabled: true
+  storageClass: "longhorn"
+  existingClaim: "pihole"
+
+podAnnotations:
+  prometheus.io/port: '9617'
+  prometheus.io/scrape: 'true'
+
+monitoring:
+  sidecar:
+    enabled: true

@@ -10,6 +10,19 @@ spec:
   - 192.168.0.200-192.168.0.250
 
 ---
+
+# Metallb address pool
+apiVersion: metallb.io/v1beta1
+kind: IPAddressPool
+metadata:
+  name: local-svc-pool
+  namespace: metallb
+spec:
+  addresses:
+  - 192.168.0.251-192.168.0.254
+  - 192.168.0.105/32
+
+---
 # L2 configuration
 apiVersion: metallb.io/v1beta1
 kind: L2Advertisement
@@ -19,3 +32,6 @@ metadata:
 spec:
   ipAddressPools:
   - picluster-pool
+  - local-svc-pool
+
+
