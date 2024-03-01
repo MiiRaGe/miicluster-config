@@ -13,6 +13,39 @@ logs:
 additionalArguments:
   - "--accesslog.filepath=/data/access.log"
   - "--metrics.prometheus=true"
+  - "--entrypoints.web.http.middlewares=traefik-traefik-bouncer@kubernetescrd,traefik-add-security-headers@kubernetescrd"
+  - "--entrypoints.websecure.http.middlewares=traefik-traefik-bouncer@kubernetescrd,traefik-add-security-headers@kubernetescrd"
+
+
+ingressRoute:
+  dashboard:
+    enabled: true
+    annotations:
+      traefik.ingress.kubernetes.io/router.entrypoints: websecure
+      traefik.ingress.kubernetes.io/router.middlewares: traefik-add-forwarded-headers@kubernetescrd,traefik-authentik@kubernetescrd
+      traefik.ingress.kubernetes.io/router.tls.certresolver: letsencrypt
+  healthcheck:
+    enabled: true
+
+ports:
+  web:
+    redirectTo:
+      port: websecure
+
+persistence:
+  enabled: true
+  storageClass: "local-permanent"
+  existingClaim: "traefik"
+
+certResolvers: 
+   letsencrypt:
+     # for challenge options cf. https://doc.traefik.io/traefik/https/acme/
+     email: aptd@protonmail.com
+     tlsChallenge: true
+     httpChallenge:
+       entryPoint: "web"
+     # It has to match the path with a persistent volume
+     storage: /data/acme.json
 
 deployment:
   # Adding access logs sidecar
@@ -30,6 +63,17 @@ deployment:
       volumeMounts:
       - mountPath: /data
         name: data
+  initContainers:
+    - name: volume-permissions
+      image: busybox:1.31.1
+      command: ["sh", "-c","touch /data/acme.json && touch /data/access.log && chmod -Rv 600 /data/acme.json && chmod -Rv 600 /data/access.log && chown 65532:65532 /data/acme.json && chown 65532:65532 /data/access.log"] 
+      securityContext:
+        runAsNonRoot: true
+        runAsGroup: 65532
+        runAsUser: 65532
+      volumeMounts:
+         - name: data
+           mountPath: /data
 
 providers:
   # Enable cross namespace references
@@ -46,3 +90,14 @@ metrics:
   prometheus:
     service:
       enabled: true
+
+service:
+  spec:
+    loadBalancerIP: "192.168.0.200"
+
+experimental:
+  plugins:
+    bouncer:
+      moduleName: github.com/maxlerebourg/crowdsec-bouncer-traefik-plugin
+      version: v1.2.1-rc1
+

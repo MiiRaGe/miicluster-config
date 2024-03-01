@@ -1,0 +1,26 @@
+ingress:
+  enabled: true
+  ingressClassName: "traefik"
+  annotations:
+    traefik.ingress.kubernetes.io/router.entrypoints: websecure
+    traefik.ingress.kubernetes.io/router.middlewares: traefik-add-forwarded-headers@kubernetescrd
+    traefik.ingress.kubernetes.io/router.tls.certresolver: letsencrypt
+  hosts: 
+    - host: authentik.miirage.net
+      paths:
+        - path: "/"
+          pathType: Prefix
+authentik:
+  secret_key: "secreeeets"
+  error_reporting:
+    enabled: true
+  postgresql:
+    host: "postgresql-primary.postgres"
+    name: "authentik"
+    password: "authentik-pw"
+  redis:
+    host: "redis-server.redis-server"
+    password: ""
+
+env:
+  AUTHENTIK_COOKIE_DOMAIN: "miirage.net"

@@ -2,8 +2,8 @@
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: "longhorn-ingress"
-  namespace: longhorn-system
+  name: "traefik-dashboard"
+  namespace: traefik
   annotations:
     traefik.ingress.kubernetes.io/router.entrypoints: websecure
     traefik.ingress.kubernetes.io/router.middlewares: traefik-add-forwarded-headers@kubernetescrd,traefik-authentik@kubernetescrd
@@ -11,14 +11,13 @@ metadata:
 spec:
   ingressClassName: "traefik"
   rules:
-    - host: longhorn.miirage.net 
+    - host: traefik.miirage.net 
       http:
         paths:
         - path: /
           pathType: Prefix
-          
           backend:
             service:
-              name: longhorn-frontend
+              name: traefik-dashboard
               port:
                 number: 80

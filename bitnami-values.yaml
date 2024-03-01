@@ -1,0 +1,11 @@
+global:
+  storageClass: "local-permanent"
+  postgresql:
+    auth:
+      username: "postgres"
+      password: "change_me"
+image:
+  registry: "registry-1.docker.io"
+  repository: "timescale/timescaledb"
+  tag: "latest-pg16"
+architecture: "replication"

@@ -1,0 +1,40 @@
+container_runtime: containerd
+tls:
+  enabled: false
+agent:
+  # To specify each pod you want to process it logs (pods present in the node)
+  acquisition:
+    # The namespace where the pod is located
+    - namespace: traefik
+      # The pod name
+      podName: traefik-*
+      # as in crowdsec configuration, we need to specify the program name so the parser will match and parse logs
+      program: traefik
+  # Those are ENV variables
+  env:
+    # As we are running Traefik, we want to install the Traefik collection
+    - name: PARSERS
+      value: "crowdsecurity/cri-logs"
+    - name: COLLECTIONS
+      value: "crowdsecurity/traefik"
+  persistentVolume:
+    config:
+      enabled: false
+lapi:
+  dashboard:
+    enabled: false
+  env:
+    - name: ENROLL_KEY
+      value: "enroll keeeeeey"
+    - name: ENROLL_INSTANCE_NAME
+      value: "k8s_cluster"
+    - name: ENROLL_TAGS
+      value: "k8s linux"
+  persistentVolume:
+    # -- Persistent volume for data folder. Stores e.g. registered bouncer api keys
+    data:
+      storageClassName: "distributed-permanent"
+    # -- Persistent volume for config folder. Stores e.g. online api credentials
+    config:
+      storageClassName: "distributed-permanent"
+

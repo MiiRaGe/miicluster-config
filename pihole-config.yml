@@ -2,6 +2,10 @@
 ingress:
   enabled: true
   ingressClassName: traefik
+  annotations:
+    traefik.ingress.kubernetes.io/router.entrypoints: websecure
+    traefik.ingress.kubernetes.io/router.middlewares: traefik-add-forwarded-headers@kubernetescrd,traefik-authentik@kubernetescrd
+    traefik.ingress.kubernetes.io/router.tls.certresolver: letsencrypt
   hosts:
   - pihole.miirage.net
 
@@ -38,8 +42,8 @@ doh:
 # persistent volume managed by longhorn
 persistentVolumeClaim:
   enabled: true
-  storageClass: "longhorn"
-  existingClaim: "pihole"
+  storageClass: "distributed-permanent"
+  existingClaim: "mii-pihole"
 
 podAnnotations:
   prometheus.io/port: '9617'
